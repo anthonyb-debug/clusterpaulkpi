@@ -1,505 +1,747 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Legacy Healing — KPI Dashboard</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KPI Dashboard — Legacy Healing &amp; Partners</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css"/>
 <style>
-/* ── TOKENS ── */
-:root {
-  --bg:       #f4f5f7;
-  --surface:  #ffffff;
-  --surface2: #f8f9fb;
-  --border:   #e5e7eb;
-  --text1:    #111827;
-  --text2:    #4b5563;
-  --text3:    #9ca3af;
-  --accent:   #2563eb;
-  --accent-l: #eff6ff;
-  --success:  #16a34a;
-  --success-l:#f0fdf4;
-  --warn:     #d97706;
-  --warn-l:   #fffbeb;
-  --danger:   #dc2626;
-  --danger-l: #fef2f2;
-  --shadow:   0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.05);
+:root{
+  --bg:#f0f2f5;--surface:#fff;--surface2:#f8f9fb;--border:#e5e7eb;--border2:#d1d5db;
+  --text1:#111827;--text2:#4b5563;--text3:#9ca3af;
+  --accent:#2563eb;--accent-l:#eff6ff;--accent-d:#1d4ed8;
+  --success:#16a34a;--success-l:#f0fdf4;--success-b:#bbf7d0;
+  --warn:#d97706;--warn-l:#fffbeb;--warn-b:#fde68a;
+  --danger:#dc2626;--danger-l:#fef2f2;--danger-b:#fecaca;
+  --purple:#7c3aed;--purple-l:#f5f3ff;
+  --sidebar-w:220px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);
 }
-[data-theme="dark"] {
-  --bg:       #0f1117;
-  --surface:  #1a1d27;
-  --surface2: #22263a;
-  --border:   #2d3148;
-  --text1:    #f1f5f9;
-  --text2:    #94a3b8;
-  --text3:    #475569;
-  --accent:   #3b82f6;
-  --accent-l: #172554;
-  --success-l:#052e16;
-  --warn-l:   #451a03;
-  --danger-l: #450a0a;
-  --shadow:   0 1px 3px rgba(0,0,0,.3);
-  --shadow-md:0 4px 12px rgba(0,0,0,.4);
+[data-theme="dark"]{
+  --bg:#0d0f18;--surface:#161926;--surface2:#1e2235;--border:#272b40;--border2:#323752;
+  --text1:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+  --accent:#3b82f6;--accent-l:#1e3a5f;--accent-d:#60a5fa;
+  --success:#22c55e;--success-l:#052e16;--success-b:#166534;
+  --warn:#f59e0b;--warn-l:#451a03;--warn-b:#92400e;
+  --danger:#ef4444;--danger-l:#450a0a;--danger-b:#991b1b;
+  --purple:#a78bfa;--purple-l:#2e1065;
+  --shadow:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 4px 16px rgba(0,0,0,.5);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text1);font-size:14px;line-height:1.5;}
-button{cursor:pointer;font-family:inherit;}
-select,input{font-family:inherit;}
+html,body{height:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text1);font-size:14px;line-height:1.5;display:flex;}
+button,select,input,textarea{font-family:inherit;cursor:pointer;}
 canvas{max-width:100%;}
+a{color:inherit;text-decoration:none;}
 
-/* ── HEADER ── */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
-.logo{display:flex;align-items:center;gap:.625rem;}
-.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0;}
-.logo-text h1{font-size:15px;font-weight:700;line-height:1.2;}
-.logo-text p{font-size:11px;color:var(--text3);}
-.header-right{display:flex;align-items:center;gap:.625rem;}
-.live-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--success-l);color:var(--success);border:1px solid #bbf7d0;white-space:nowrap;}
-[data-theme="dark"] .live-badge{border-color:#166534;}
-.icon-btn{background:none;border:1px solid var(--border);border-radius:7px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px;transition:all .15s;}
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .25s;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:1rem 1rem .875rem;border-bottom:1px solid var(--border);}
+.sb-mark{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;}
+.sb-name{font-size:14px;font-weight:700;line-height:1.2;}
+.sb-sub{font-size:11px;color:var(--text3);}
+.sb-nav{flex:1;padding:.625rem .5rem;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.sb-section{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);padding:.5rem .625rem .25rem;}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:.5rem .625rem;border-radius:8px;border:none;background:none;color:var(--text2);font-size:13px;font-weight:500;width:100%;text-align:left;transition:all .15s;}
+.nav-btn i{font-size:17px;flex-shrink:0;}
+.nav-btn:hover{background:var(--surface2);color:var(--text1);}
+.nav-btn.active{background:var(--accent-l);color:var(--accent);}
+.sb-bottom{border-top:1px solid var(--border);padding:.75rem .75rem .875rem;}
+.sb-actions{display:flex;gap:4px;margin-top:.625rem;}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:7px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:16px;transition:all .15s;}
 .icon-btn:hover{background:var(--surface2);color:var(--text1);}
-.btn-export{height:34px;padding:0 .875rem;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:.35rem;transition:background .15s;}
-.btn-export:hover{background:#1d4ed8;}
-.btn-refresh{height:34px;padding:0 .875rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;font-size:13px;display:flex;align-items:center;gap:.35rem;transition:all .15s;}
-.btn-refresh:hover{border-color:var(--accent);color:var(--accent);}
-.refresh-time{font-size:11px;color:var(--text3);}
-
-/* ── FILTERS ── */
-.filters{padding:.875rem 1.5rem;display:flex;gap:.625rem;flex-wrap:wrap;align-items:flex-end;background:var(--surface);border-bottom:1px solid var(--border);}
-.f-group{display:flex;flex-direction:column;gap:.25rem;}
-.f-group label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
-.f-group select,.f-group input{height:34px;padding:0 .75rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text1);font-size:13px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;}
-.f-group input{background-image:none;padding-right:.75rem;width:160px;}
-.f-group select:focus,.f-group input:focus{outline:none;border-color:var(--accent);}
 
 /* ── MAIN ── */
-.main{padding:1.25rem 1.5rem 2.5rem;}
+.app-body{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;max-width:100%;overflow:hidden;}
 
-/* ── KPI CARDS ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem;margin-bottom:1.25rem;}
-.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;box-shadow:var(--shadow);}
-.kpi-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:.625rem;}
-.kpi-label{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:.25rem;}
-.kpi-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:.35rem;}
-.status-chip{display:inline-flex;align-items:center;gap:.2rem;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;}
-.s-green{background:var(--success-l);color:var(--success);}
-.s-yellow{background:var(--warn-l);color:var(--warn);}
-.s-red{background:var(--danger-l);color:var(--danger);}
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:1rem;}
+.topbar-left{display:flex;align-items:center;gap:.75rem;}
+.topbar-right{display:flex;align-items:center;gap:.625rem;}
+.page-title{font-size:16px;font-weight:600;}
+.live-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--success-l);color:var(--success);border:1px solid var(--success-b);white-space:nowrap;}
+.live-badge.demo{background:var(--warn-l);color:var(--warn);border-color:var(--warn-b);}
+.live-badge.loading{background:var(--surface2);color:var(--text3);border-color:var(--border);}
+.refresh-time{font-size:11px;color:var(--text3);}
+.btn-primary{height:34px;padding:0 .875rem;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:.35rem;transition:background .15s;}
+.btn-primary:hover{background:var(--accent-d);}
+.btn-secondary{height:34px;padding:0 .875rem;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;font-size:13px;display:inline-flex;align-items:center;gap:.35rem;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.menu-btn{background:none;border:none;color:var(--text2);font-size:20px;padding:.2rem;display:none;}
 
-/* ── CHARTS ── */
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;}
-@media(max-width:700px){.charts-row{grid-template-columns:1fr;}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;box-shadow:var(--shadow);}
-.card-title{font-size:13px;font-weight:600;margin-bottom:1rem;color:var(--text1);}
-.card-title span{font-weight:400;color:var(--text3);margin-left:.4rem;font-size:12px;}
+/* ── FILTERS ── */
+.filters-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;gap:.625rem;flex-wrap:wrap;align-items:flex-end;}
+.f-group{display:flex;flex-direction:column;gap:.25rem;}
+.f-group label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.f-sel,.f-inp{height:34px;padding:0 .75rem;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text1);font-size:13px;}
+.f-sel{appearance:none;padding-right:26px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+.f-inp{background-image:none;width:170px;}
+.f-sel:focus,.f-inp:focus{outline:none;border-color:var(--accent);}
 
-/* ── RANKING TABLE ── */
-.table-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;}
-.table-head{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.1rem;border-bottom:1px solid var(--border);gap:.75rem;flex-wrap:wrap;}
-.table-title{font-size:13px;font-weight:600;}
-.search-box{height:32px;padding:0 .75rem;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text1);font-size:13px;width:180px;}
-.search-box:focus{outline:none;border-color:var(--accent);}
+/* ── PAGE ── */
+.page{padding:1.25rem 1.5rem 3rem;display:none;}
+.page.active{display:block;}
+
+/* ── SECTION TITLE ── */
+.section-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;}
+
+/* ── TOP PERFORMERS ── */
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-bottom:1.5rem;}
+.podium-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1rem;text-align:center;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.podium-card.gold{border-color:#fbbf24;background:linear-gradient(160deg,#fffbeb 0%,#fff 60%);}
+.podium-card.silver{border-color:#d1d5db;}
+.podium-card.bronze{border-color:#d97706;background:linear-gradient(160deg,#fff7ed 0%,#fff 60%);}
+[data-theme="dark"] .podium-card.gold{background:linear-gradient(160deg,#451a03 0%,var(--surface) 60%);}
+[data-theme="dark"] .podium-card.bronze{background:linear-gradient(160deg,#422006 0%,var(--surface) 60%);}
+.podium-medal{font-size:28px;display:block;margin-bottom:.4rem;}
+.podium-rank{position:absolute;top:.625rem;right:.75rem;font-size:11px;font-weight:700;color:var(--text3);}
+.podium-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;margin:0 auto .625rem;}
+.podium-name{font-size:13px;font-weight:600;margin-bottom:.2rem;}
+.podium-campaign{font-size:11px;color:var(--text3);margin-bottom:.625rem;}
+.podium-score{font-size:26px;font-weight:800;line-height:1;}
+.podium-score-label{font-size:11px;color:var(--text3);}
+.podium-delta{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;margin-top:.4rem;padding:2px 7px;border-radius:20px;}
+.delta-up{background:var(--success-l);color:var(--success);}
+.delta-dn{background:var(--danger-l);color:var(--danger);}
+.delta-flat{background:var(--surface2);color:var(--text3);}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;box-shadow:var(--shadow);transition:box-shadow .2s;}
+.kpi-card:hover{box-shadow:var(--shadow-md);}
+.kpi-ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:.625rem;}
+.kpi-label{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:.2rem;}
+.kpi-val{font-size:24px;font-weight:800;line-height:1;margin-bottom:.35rem;}
+.kpi-chip{display:inline-flex;align-items:center;gap:.2rem;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;}
+.c-g{background:var(--success-l);color:var(--success);}
+.c-y{background:var(--warn-l);color:var(--warn);}
+.c-r{background:var(--danger-l);color:var(--danger);}
+
+/* ── CHARTS ROW ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+@media(max-width:680px){.charts-row{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem;box-shadow:var(--shadow);}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:.875rem;display:flex;align-items:center;gap:.4rem;}
+.chart-title i{color:var(--accent);font-size:15px;}
+
+/* ── TABLE ── */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.1rem;border-bottom:1px solid var(--border);gap:.75rem;flex-wrap:wrap;}
+.table-toolbar-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:.4rem;}
+.table-toolbar-title i{color:var(--accent);}
+.t-search{height:32px;padding:0 .75rem;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text1);font-size:13px;width:190px;}
+.t-search:focus{outline:none;border-color:var(--accent);}
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{background:var(--surface2);padding:.575rem .875rem;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th{background:var(--surface2);padding:.55rem .875rem;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
 thead th:hover{color:var(--text1);}
 tbody td{padding:.65rem .875rem;border-bottom:1px solid var(--border);color:var(--text1);white-space:nowrap;}
 tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover td{background:var(--surface2);}
+tbody tr:hover td{background:var(--surface2);cursor:pointer;}
 tbody tr.top-row td{background:var(--accent-l);}
-[data-theme="dark"] tbody tr.top-row td{background:#172554;}
-
-/* progress bar */
-.bar-wrap{display:flex;align-items:center;gap:.4rem;}
-.bar-track{height:5px;background:var(--surface2);border-radius:3px;min-width:55px;flex:1;}
-.bar-fill{height:100%;border-radius:3px;}
-.bar-val{font-size:12px;min-width:44px;text-align:right;}
-
-/* grade chip */
+[data-theme="dark"] tbody tr.top-row td{background:#1e3058;}
+.medal{font-size:17px;}
+.rank-num{font-weight:700;color:var(--accent);}
 .g{display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;border-radius:4px;font-size:11px;font-weight:700;}
-.g5{background:#eff6ff;color:#1d4ed8;} .g4{background:#f0fdf4;color:#15803d;}
-.g3{background:#fefce8;color:#a16207;} .g2{background:#fff7ed;color:#c2410c;}
+.g5{background:#eff6ff;color:#1d4ed8;}.g4{background:#f0fdf4;color:#15803d;}
+.g3{background:#fefce8;color:#a16207;}.g2{background:#fff7ed;color:#c2410c;}
 .g1{background:#fef2f2;color:#b91c1c;}
-[data-theme="dark"] .g5{background:#172554;color:#93c5fd;} [data-theme="dark"] .g4{background:#052e16;color:#86efac;}
-[data-theme="dark"] .g3{background:#422006;color:#fde68a;} [data-theme="dark"] .g2{background:#431407;color:#fdba74;}
+[data-theme="dark"] .g5{background:#1e3a5f;color:#93c5fd;}[data-theme="dark"] .g4{background:#052e16;color:#86efac;}
+[data-theme="dark"] .g3{background:#422006;color:#fde68a;}[data-theme="dark"] .g2{background:#431407;color:#fdba74;}
 [data-theme="dark"] .g1{background:#450a0a;color:#fca5a5;}
-
-/* equiv */
 .eq{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
 .eq-exc{background:var(--accent-l);color:var(--accent);}
 .eq-meet{background:var(--success-l);color:var(--success);}
 .eq-bel{background:var(--warn-l);color:var(--warn);}
 .eq-exp{background:var(--danger-l);color:var(--danger);}
 .eq-na{background:var(--surface2);color:var(--text3);}
+.camp-tag{font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--accent-l);color:var(--accent);}
+.bar-wrap{display:flex;align-items:center;gap:.4rem;}
+.bar-track{height:5px;background:var(--surface2);border-radius:3px;min-width:50px;flex:1;}
+.bar-fill{height:100%;border-radius:3px;}
+.bar-val{font-size:12px;min-width:42px;text-align:right;}
+.td-delta{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:600;padding:1px 5px;border-radius:10px;}
 
-/* rank */
-.rank-num{font-weight:700;color:var(--accent);}
-.medal{font-size:16px;}
+/* ── AGENT PROFILE SLIDE-OVER ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:flex-start;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.slideover{width:480px;max-width:100vw;background:var(--surface);height:100vh;overflow-y:auto;box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;}
+.so-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:10;}
+.so-header-title{font-size:14px;font-weight:600;}
+.so-body{padding:1.25rem;flex:1;}
+.so-hero{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;padding:1rem;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
+.so-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;}
+.so-agent-name{font-size:16px;font-weight:700;}
+.so-agent-camp{font-size:12px;color:var(--text3);margin-top:.15rem;}
+.so-rank-badge{margin-left:auto;text-align:center;background:var(--accent-l);border-radius:8px;padding:.5rem .875rem;}
+.so-rank-num{font-size:22px;font-weight:800;color:var(--accent);line-height:1;}
+.so-rank-label{font-size:10px;color:var(--accent);font-weight:500;}
+.so-section{margin-bottom:1.25rem;}
+.so-section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.625rem;}
+.so-kpis{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.so-kpi{background:var(--surface2);border-radius:8px;padding:.625rem .75rem;border:1px solid var(--border);}
+.so-kpi-label{font-size:11px;color:var(--text2);margin-bottom:.15rem;}
+.so-kpi-val{font-size:18px;font-weight:700;line-height:1;}
+.so-kpi-delta{font-size:11px;margin-top:.2rem;}
+.progress-row{display:flex;align-items:center;gap:.625rem;margin-bottom:.5rem;}
+.progress-label{font-size:12px;color:var(--text2);width:120px;flex-shrink:0;}
+.progress-track{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative;}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s;}
+.progress-target{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);opacity:.6;}
+.progress-val{font-size:12px;font-weight:600;width:38px;text-align:right;}
+.history-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:13px;}
+.history-row:last-child{border-bottom:none;}
+.history-period{color:var(--text2);}
 
-/* empty / loading */
-.msg{text-align:center;padding:3rem;color:var(--text3);font-size:13px;}
-.msg.err{color:var(--danger);}
+/* ── ALERTS ── */
+.alerts-bar{margin-bottom:1.25rem;display:flex;flex-direction:column;gap:.5rem;}
+.alert-item{display:flex;align-items:center;gap:.625rem;padding:.625rem .875rem;border-radius:8px;font-size:13px;border:1px solid;}
+.alert-warn{background:var(--warn-l);border-color:var(--warn-b);color:var(--warn);}
+.alert-good{background:var(--success-l);border-color:var(--success-b);color:var(--success);}
+.alert-item i{font-size:16px;flex-shrink:0;}
 
-/* toast */
-#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text1);color:var(--surface);padding:.65rem 1rem;border-radius:8px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);display:none;z-index:999;}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text1);color:var(--surface);padding:.625rem 1rem;border-radius:8px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);display:none;z-index:999;max-width:300px;}
+
+/* ── EMPTY / MSG ── */
+.msg-empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px;}
+
+/* ── PRINT ── */
+@media print{
+  .sidebar,.topbar,.filters-bar,.no-print{display:none!important;}
+  .app-body{margin-left:0;}
+  .page{display:block!important;}
+  .overlay{display:none!important;}
+}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:none;}
+  .app-body{margin-left:0;}
+  .menu-btn{display:flex;}
+  .podium{grid-template-columns:1fr;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+}
 
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.spinning{animation:spin .8s linear infinite;display:inline-block;}
+.spin{animation:spin .8s linear infinite;display:inline-block;}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">
-    <div class="logo-mark">K</div>
-    <div class="logo-text">
-      <h1>KPI Dashboard</h1>
-      <p>Legacy Healing · Banyan · Takahami</p>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark"><i class="ti ti-chart-infographic" style="font-size:17px"></i></div>
+    <div>
+      <div class="sb-name">KPI Hub</div>
+      <div class="sb-sub">Performance dashboard</div>
     </div>
   </div>
-  <div class="header-right">
-    <span class="live-badge" id="live-badge">● Loading…</span>
-    <span class="refresh-time" id="refresh-time"></span>
-    <button class="btn-refresh" onclick="loadData()"><span id="refresh-icon">↻</span> Refresh</button>
-    <button class="btn-export" onclick="exportCSV()">↓ Export CSV</button>
-    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle dark mode">🌙</button>
-  </div>
-</header>
-
-<!-- FILTERS -->
-<div class="filters">
-  <div class="f-group"><label>Agent</label><select id="f-agent" onchange="render()"><option value="">All agents</option></select></div>
-  <div class="f-group"><label>Month</label><select id="f-month" onchange="render()"><option value="">All months</option></select></div>
-  <div class="f-group"><label>Year</label><select id="f-year" onchange="render()"><option value="">All years</option></select></div>
-  <div class="f-group"><label>Campaign</label><select id="f-campaign" onchange="render()"><option value="">All campaigns</option><option>Legacy Healing Center</option><option>Banyan Treatment Center</option><option>Takahami Medical Billing</option></select></div>
-  <div class="f-group"><label>Equivalent</label>
-    <select id="f-equiv" onchange="render()">
-      <option value="">All</option>
-      <option>Exceeds Expectations</option>
-      <option>Meets Expectations</option>
-      <option>Below Expectations</option>
-      <option>Needs Improvement</option>
-    </select>
-  </div>
-  <div class="f-group"><label>Search</label><input type="text" id="f-search" placeholder="Agent name…" oninput="render()" /></div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- KPI SUMMARY CARDS -->
-  <div class="kpi-grid" id="kpi-cards"></div>
-
-  <!-- CHARTS -->
-  <div class="charts-row">
-    <div class="card">
-      <div class="card-title">Avg KPI Score by Month <span id="trend-label"></span></div>
-      <canvas id="chart-trend" height="200"></canvas>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <button class="nav-btn active" onclick="showPage('overview',this)">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </button>
+    <div class="sb-section">Performance</div>
+    <button class="nav-btn" onclick="showPage('ranking',this)">
+      <i class="ti ti-trophy"></i> Team ranking
+    </button>
+    <button class="nav-btn" onclick="showPage('trends',this)">
+      <i class="ti ti-trending-up"></i> Trends
+    </button>
+  </nav>
+  <div class="sb-bottom">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:.4rem">Legacy · Banyan · Takahami</div>
+    <div class="sb-actions">
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme"><i class="ti ti-moon" id="theme-ic"></i></button>
+      <button class="icon-btn" onclick="loadData()" title="Refresh"><i class="ti ti-refresh" id="refresh-ic"></i></button>
+      <button class="icon-btn" onclick="exportCSV()" title="Export CSV"><i class="ti ti-download"></i></button>
+      <button class="icon-btn" onclick="window.print()" title="Print"><i class="ti ti-printer"></i></button>
     </div>
-    <div class="card">
-      <div class="card-title">Score distribution</div>
-      <canvas id="chart-donut" height="200"></canvas>
+  </div>
+</aside>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn icon-btn" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+      <span class="page-title" id="page-title">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="live-badge loading" id="live-badge">● Loading…</span>
+      <span class="refresh-time" id="refresh-time"></span>
+      <button class="btn-primary no-print" onclick="loadData()"><i class="ti ti-refresh" id="refresh-ic2"></i> Refresh</button>
     </div>
   </div>
 
-  <!-- RANKING TABLE -->
-  <div class="table-card">
-    <div class="table-head">
-      <span class="table-title">Team ranking</span>
-      <input type="text" class="search-box" id="rank-search" placeholder="Search agent…" oninput="filterTable()" />
+  <!-- FILTERS -->
+  <div class="filters-bar no-print">
+    <div class="f-group"><label>Campaign</label>
+      <select class="f-sel" id="f-campaign" onchange="render()">
+        <option value="">All campaigns</option>
+        <option>Legacy Healing Center</option>
+        <option>Banyan Treatment Center</option>
+        <option>Takahami Medical Billing</option>
+      </select>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy('rank')">Rank ↕</th>
-            <th onclick="sortBy('agent')">Agent ↕</th>
-            <th onclick="sortBy('campaign')">Campaign ↕</th>
-            <th onclick="sortBy('month')">Period ↕</th>
-            <th onclick="sortBy('attendance')">Attendance ↕</th>
-            <th>Att. Grade</th>
-            <th onclick="sortBy('quality')">Quality ↕</th>
-            <th>QA Grade</th>
-            <th onclick="sortBy('transfer')">Transfer Rate ↕</th>
-            <th>TR Grade</th>
-            <th onclick="sortBy('admission')">Admission Rate ↕</th>
-            <th>AR Grade</th>
-            <th onclick="sortBy('vob')">VOB Rate ↕</th>
-            <th>VOB Grade</th>
-            <th onclick="sortBy('aht')">AHT ↕</th>
-            <th>AHT Grade</th>
-            <th onclick="sortBy('avgWeighted')">Avg Weighted ↕</th>
-            <th onclick="sortBy('totalGrade')">Total Grade ↕</th>
-            <th onclick="sortBy('equivalent')">Equivalent ↕</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+    <div class="f-group"><label>Month</label><select class="f-sel" id="f-month" onchange="render()"><option value="">All months</option></select></div>
+    <div class="f-group"><label>Year</label><select class="f-sel" id="f-year" onchange="render()"><option value="">All years</option></select></div>
+    <div class="f-group"><label>Equivalent</label>
+      <select class="f-sel" id="f-equiv" onchange="render()">
+        <option value="">All</option>
+        <option>Exceeds Expectations</option>
+        <option>Meets Expectations</option>
+        <option>Below Expectations</option>
+        <option>Needs Improvement</option>
+      </select>
+    </div>
+    <div class="f-group"><label>Search</label><input type="text" class="f-inp" id="f-search" placeholder="Agent name…" oninput="render()"/></div>
+  </div>
+
+  <!-- PAGE: OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div id="alerts-bar" class="alerts-bar"></div>
+    <div class="section-title">Top performers this period</div>
+    <div class="podium" id="podium"></div>
+    <div class="section-title">Team summary</div>
+    <div class="kpi-grid" id="kpi-cards"></div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-line"></i> KPI trend by month</div>
+        <canvas id="chart-trend" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-donut"></i> Score distribution</div>
+        <canvas id="chart-donut" height="200"></canvas>
+      </div>
     </div>
   </div>
 
+  <!-- PAGE: RANKING -->
+  <div class="page" id="page-ranking">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span class="table-toolbar-title"><i class="ti ti-trophy"></i> Team leaderboard</span>
+        <input type="text" class="t-search" id="rank-search" placeholder="Search agent…" oninput="filterTable()"/>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('rank')">Rank</th>
+              <th onclick="sortBy('agent')">Agent</th>
+              <th onclick="sortBy('campaign')">Campaign</th>
+              <th onclick="sortBy('month')">Period</th>
+              <th onclick="sortBy('attendance')">Attendance</th>
+              <th>Att.</th>
+              <th onclick="sortBy('quality')">Quality</th>
+              <th>QA</th>
+              <th onclick="sortBy('transfer')">Transfer</th>
+              <th>TR</th>
+              <th onclick="sortBy('admission')">Admission</th>
+              <th>AR</th>
+              <th onclick="sortBy('vob')">VOB</th>
+              <th>VOB</th>
+              <th onclick="sortBy('aht')">AHT</th>
+              <th>AHT</th>
+              <th onclick="sortBy('avgWeighted')">Avg Wtd.</th>
+              <th onclick="sortBy('totalGrade')">Total</th>
+              <th onclick="sortBy('equivalent')">Equivalent</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: TRENDS -->
+  <div class="page" id="page-trends">
+    <div class="charts-row" style="grid-template-columns:1fr">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-trending-up"></i> All agents — total grade over time</div>
+        <canvas id="chart-lines" height="260"></canvas>
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i> Campaign comparison</div>
+        <canvas id="chart-camp" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-radar"></i> Team average scorecard</div>
+        <canvas id="chart-radar" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<!-- AGENT SLIDE-OVER -->
+<div class="overlay" id="overlay" onclick="closeSlideOver(event)">
+  <div class="slideover" id="slideover">
+    <div class="so-header">
+      <span class="so-header-title">Agent profile</span>
+      <button class="icon-btn" onclick="closeSlideOver()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="so-body" id="so-body"></div>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────
+// ── CONFIG ──────────────────────────────────────────────
 const SHEET_ID   = '10tZir1sa78DhyjEuIFXJOE-5I980YqMjdgEcEeD0_pY';
 const SHEET_TABS = [
-  { tab: 'Legacy KPI',     campaign: 'Legacy Healing Center' },
-  { tab: 'Banyan KPI',     campaign: 'Banyan Treatment Center' },
-  { tab: 'Takahami KPI 1', campaign: 'Takahami Medical Billing' },
-  { tab: 'Takahami KPI 2', campaign: 'Takahami Medical Billing' },
+  { tab:'Legacy KPI',     campaign:'Legacy Healing Center' },
+  { tab:'Banyan KPI',     campaign:'Banyan Treatment Center' },
+  { tab:'Takahami KPI 1', campaign:'Takahami Medical Billing' },
+  { tab:'Takahami KPI 2', campaign:'Takahami Medical Billing' },
 ];
-const API_KEY    = 'AIzaSyBGEMtlEwy4iTdleF3wyJQgLkEk6w9VY1c';
+const API_KEY = 'AIzaSyBGEMtlEwy4iTdleF3wyJQgLkEk6w9VY1c';
 
-const TARGETS = { attendance: 98, quality: 90 };
+const TARGETS = { attendance:98, quality:90, totalGrade:3.0 };
+const MONTH_ORDER = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAMP_COLORS = {'Legacy Healing Center':'#2563eb','Banyan Treatment Center':'#16a34a','Takahami Medical Billing':'#d97706'};
+const AVATAR_COLORS = ['#2563eb','#16a34a','#7c3aed','#d97706','#db2777','#0891b2','#65a30d','#dc2626'];
 
-// ── STATE ────────────────────────────────────────────────────────────
-let allRows = [], sortKey = 'rank', sortAsc = true;
-let chartTrend = null, chartDonut = null;
+// ── STATE ────────────────────────────────────────────────
+let allRows=[], sortKey='rank', sortAsc=true;
+let charts={};
 
-// ── LOAD ─────────────────────────────────────────────────────────────
-async function loadData() {
+// ── LOAD ─────────────────────────────────────────────────
+async function loadData(){
   setBadge('loading');
-  const icon = document.getElementById('refresh-icon');
-  icon.classList.add('spinning');
-
-  if (!API_KEY) { useDemoData(); icon.classList.remove('spinning'); return; }
-
-  try {
-    const fetches = SHEET_TABS.map(({ tab, campaign }) => {
-      const range = encodeURIComponent(`${tab}!A2:V2000`);
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
-      return fetch(url).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status} on tab "${tab}"`))
-        .then(json => (json.values || []).map(r => ({ ...parseRow(r), campaign })).filter(r => r.agent));
-    });
-    const results = await Promise.all(fetches);
-    allRows = results.flat();
+  const ic1=document.getElementById('refresh-ic');
+  const ic2=document.getElementById('refresh-ic2');
+  ic1.classList.add('spin'); ic2.classList.add('spin');
+  if(!API_KEY){ useDemoData(); ic1.classList.remove('spin'); ic2.classList.remove('spin'); return; }
+  try{
+    const results = await Promise.all(SHEET_TABS.map(({tab,campaign})=>{
+      const range=encodeURIComponent(`${tab}!A2:V2000`);
+      const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+      return fetch(url).then(r=>r.ok?r.json():Promise.reject(`HTTP ${r.status} on "${tab}"`))
+        .then(json=>(json.values||[]).map(r=>({...parseRow(r),campaign})).filter(r=>r.agent));
+    }));
+    allRows=results.flat();
     setBadge('live');
-    populateFilters();
-    render();
-  } catch (e) {
-    console.warn(e);
-    useDemoData();
-    setBadge('demo');
+    populateFilters(); render();
+  }catch(e){
+    console.warn(e); useDemoData(); setBadge('demo');
     toast('Could not reach Google Sheets — showing demo data');
   }
-  icon.classList.remove('spinning');
-  document.getElementById('refresh-time').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  ic1.classList.remove('spin'); ic2.classList.remove('spin');
+  document.getElementById('refresh-time').textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 }
 
-function parseRow(r) {
-  return {
-    year: r[0]||'', month: r[1]||'', agent: r[2]||'', campaign: '',
-    attendance: r[3]||'', attGrade: r[4]||'',
-    quality: r[6]||'', qaGrade: r[7]||'',
-    transfer: r[9]||'', trGrade: r[10]||'',
-    admission: r[11]||'', arGrade: r[12]||'',
-    vob: r[13]||'', vobGrade: r[14]||'',
-    aht: r[15]||'', ahtGrade: r[16]||'',
-    avgWeighted: r[17]||'', totalGrade: r[18]||'',
-    equivalent: r[19]||'', rank: r[20]||'',
-  };
+function parseRow(r){
+  return{year:r[0]||'',month:r[1]||'',agent:r[2]||'',campaign:'',
+    attendance:r[3]||'',attGrade:r[4]||'',
+    quality:r[6]||'',qaGrade:r[7]||'',
+    transfer:r[9]||'',trGrade:r[10]||'',
+    admission:r[11]||'',arGrade:r[12]||'',
+    vob:r[13]||'',vobGrade:r[14]||'',
+    aht:r[15]||'',ahtGrade:r[16]||'',
+    avgWeighted:r[17]||'',totalGrade:r[18]||'',
+    equivalent:r[19]||'',rank:r[20]||''};
 }
 
-function setBadge(state) {
-  const b = document.getElementById('live-badge');
-  if (state === 'live')    { b.textContent = '● Live'; b.style.cssText = 'background:var(--success-l);color:var(--success)'; }
-  else if (state === 'demo') { b.textContent = '● Demo'; b.style.cssText = 'background:var(--warn-l);color:var(--warn)'; }
-  else                     { b.textContent = '● Loading…'; b.style.cssText = ''; }
+function setBadge(s){
+  const b=document.getElementById('live-badge');
+  b.className='live-badge'+(s==='demo'?' demo':s==='loading'?' loading':'');
+  b.textContent=s==='live'?'● Live':s==='demo'?'● Demo':'● Loading…';
 }
 
-// ── DEMO DATA ─────────────────────────────────────────────────────────
-function useDemoData() {
-  allRows = [
-    {year:'2026',month:'February',agent:'Angel, Byron Jake',    campaign:'Legacy Healing Center',attendance:'100.00%',attGrade:'5',quality:'90.44%',qaGrade:'4',transfer:'4.73%',trGrade:'3',admission:'14.29%',arGrade:'4',vob:'4.73%',vobGrade:'3',aht:'0:02:04',ahtGrade:'4',avgWeighted:'1.63',totalGrade:'2.13',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'February',agent:'Dujale, John Vincent', attendance:'99.96%', attGrade:'5',quality:'87.17%',qaGrade:'3',transfer:'2.64%',trGrade:'2',admission:'0.00%', arGrade:'2',vob:'3.02%',vobGrade:'3',aht:'0:02:13',ahtGrade:'4',avgWeighted:'1.38',totalGrade:'2.38',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'February',agent:'Galong, Julia Mae',    attendance:'99.83%', attGrade:'3',quality:'94.50%',qaGrade:'5',transfer:'4.59%',trGrade:'3',admission:'0.00%', arGrade:'1',vob:'5.96%',vobGrade:'4',aht:'0:02:58',ahtGrade:'1',avgWeighted:'1.25',totalGrade:'2.25',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'February',agent:'Lajo, Ella Mae',       attendance:'99.70%', attGrade:'3',quality:'86.91%',qaGrade:'3',transfer:'2.31%',trGrade:'2',admission:'50.00%',arGrade:'5',vob:'3.08%',vobGrade:'3',aht:'0:03:19',ahtGrade:'1',avgWeighted:'1.25',totalGrade:'2.00',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'February',agent:'Lopez, Maria Nelia',   attendance:'94.78%', attGrade:'3',quality:'88.25%',qaGrade:'3',transfer:'5.80%',trGrade:'3',admission:'8.33%', arGrade:'3',vob:'6.76%',vobGrade:'5',aht:'0:03:22',ahtGrade:'1',avgWeighted:'1.63',totalGrade:'2.38',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'February',agent:'Lumactod, Nikki',      attendance:'99.50%', attGrade:'3',quality:'90.66%',qaGrade:'4',transfer:'6.67%',trGrade:'3',admission:'5.26%', arGrade:'2',vob:'8.42%',vobGrade:'4',aht:'0:02:55',ahtGrade:'1',avgWeighted:'1.50',totalGrade:'2.50',equivalent:'Below Expectations',rank:''},
-    {year:'2026',month:'January', agent:'Angel, Byron Jake',    attendance:'99.88%', attGrade:'3',quality:'89.41%',qaGrade:'4',transfer:'5.87%',trGrade:'3',admission:'7.41%', arGrade:'3',vob:'3.26%',vobGrade:'5',aht:'0:03:09',ahtGrade:'2',avgWeighted:'1.63',totalGrade:'2.63',equivalent:'Below Expectations',rank:'9'},
-    {year:'2026',month:'January', agent:'Dujale, John Vincent', attendance:'94.44%', attGrade:'2',quality:'91.00%',qaGrade:'5',transfer:'9.46%',trGrade:'4',admission:'14.29%',arGrade:'4',vob:'6.76%',vobGrade:'5',aht:'0:03:56',ahtGrade:'1',avgWeighted:'1.88',totalGrade:'2.88',equivalent:'Below Expectations',rank:'8'},
-    {year:'2026',month:'January', agent:'Galong, Julia Mae',    attendance:'100.00%',attGrade:'5',quality:'94.17%',qaGrade:'5',transfer:'12.40%',trGrade:'5',admission:'0.00%', arGrade:'1',vob:'7.75%',vobGrade:'4',aht:'0:05:34',ahtGrade:'1',avgWeighted:'1.38',totalGrade:'2.88',equivalent:'Below Expectations',rank:'4'},
-    {year:'2026',month:'January', agent:'Padullano, Larinz',    attendance:'100.00%',attGrade:'5',quality:'83.67%',qaGrade:'2',transfer:'6.32%',trGrade:'3',admission:'5.41%', arGrade:'2',vob:'5.81%',vobGrade:'4',aht:'0:00:43',ahtGrade:'5',avgWeighted:'1.63',totalGrade:'3.13',equivalent:'Meets Expectations',rank:'1'},
-    {year:'2026',month:'January', agent:'Regla, Ma Cecilia',    attendance:'99.99%', attGrade:'3',quality:'87.00%',qaGrade:'3',transfer:'11.43%',trGrade:'5',admission:'5.00%', arGrade:'2',vob:'6.86%',vobGrade:'5',aht:'0:03:58',ahtGrade:'1',avgWeighted:'1.50',totalGrade:'2.50',equivalent:'Below Expectations',rank:''},
-    {year:'2025',month:'December',agent:'Angel, Byron Jake',    attendance:'100.00%',attGrade:'5',quality:'89.08%',qaGrade:'4',transfer:'3.17%',trGrade:'2',admission:'0.00%', arGrade:'1',vob:'3.66%',vobGrade:'4',aht:'0:01:48',ahtGrade:'5',avgWeighted:'1.13',totalGrade:'2.50',equivalent:'Below Expectations',rank:'2'},
-    {year:'2025',month:'December',agent:'Padullano, Larinz',    attendance:'100.00%',attGrade:'5',quality:'91.33%',qaGrade:'5',transfer:'5.52%',trGrade:'3',admission:'10.00%',arGrade:'3',vob:'4.53%',vobGrade:'1',aht:'0:01:57',ahtGrade:'5',avgWeighted:'1.50',totalGrade:'3.00',equivalent:'Meets Expectations',rank:'1'},
-    {year:'2025',month:'November',agent:'Angel, Byron Jake',    attendance:'100.00%',attGrade:'5',quality:'92.00%',qaGrade:'5',transfer:'2.79%',trGrade:'2',admission:'7.14%', arGrade:'3',vob:'2.99%',vobGrade:'3',aht:'0:02:03',ahtGrade:'4',avgWeighted:'1.50',totalGrade:'3.00',equivalent:'Meets Expectations',rank:'3'},
-    {year:'2025',month:'November',agent:'Padullano, Larinz',    attendance:'100.00%',attGrade:'5',quality:'89.16%',qaGrade:'3',transfer:'4.24%',trGrade:'2',admission:'10.00%',arGrade:'3',vob:'3.50%',vobGrade:'5',aht:'0:00:22',ahtGrade:'5',avgWeighted:'1.63',totalGrade:'3.13',equivalent:'Meets Expectations',rank:'7'},
-    {year:'2025',month:'November',agent:'Villarta, Remington',  attendance:'95.45%', attGrade:'3',quality:'82.16%',qaGrade:'1',transfer:'6.57%',trGrade:'3',admission:'0.00%', arGrade:'1',vob:'5.84%',vobGrade:'1',aht:'0:02:11',ahtGrade:'4',avgWeighted:'1.13',totalGrade:'2.13',equivalent:'Below Expectations',rank:'11'},
+// ── DEMO DATA ─────────────────────────────────────────────
+function useDemoData(){
+  allRows=[
+    {year:'2026',month:'February',agent:'Angel, Byron Jake',    campaign:'Legacy Healing Center',  attendance:'100.00%',attGrade:'5',quality:'90.44%',qaGrade:'4',transfer:'4.73%',trGrade:'3',admission:'14.29%',arGrade:'4',vob:'4.73%',vobGrade:'3',aht:'0:02:04',ahtGrade:'4',avgWeighted:'1.63',totalGrade:'2.13',equivalent:'Below Expectations',rank:''},
+    {year:'2026',month:'February',agent:'Dujale, John Vincent', campaign:'Legacy Healing Center',  attendance:'99.96%', attGrade:'5',quality:'87.17%',qaGrade:'3',transfer:'2.64%',trGrade:'2',admission:'0.00%', arGrade:'2',vob:'3.02%',vobGrade:'3',aht:'0:02:13',ahtGrade:'4',avgWeighted:'1.38',totalGrade:'2.38',equivalent:'Below Expectations',rank:''},
+    {year:'2026',month:'February',agent:'Galong, Julia Mae',    campaign:'Legacy Healing Center',  attendance:'99.83%', attGrade:'3',quality:'94.50%',qaGrade:'5',transfer:'4.59%',trGrade:'3',admission:'0.00%', arGrade:'1',vob:'5.96%',vobGrade:'4',aht:'0:02:58',ahtGrade:'1',avgWeighted:'1.25',totalGrade:'2.25',equivalent:'Below Expectations',rank:''},
+    {year:'2026',month:'February',agent:'Padullano, Larinz',    campaign:'Legacy Healing Center',  attendance:'100.00%',attGrade:'5',quality:'85.00%',qaGrade:'3',transfer:'6.00%',trGrade:'3',admission:'8.00%', arGrade:'3',vob:'4.00%',vobGrade:'4',aht:'0:01:30',ahtGrade:'5',avgWeighted:'1.75',totalGrade:'3.25',equivalent:'Meets Expectations',rank:'1'},
+    {year:'2026',month:'January', agent:'Angel, Byron Jake',    campaign:'Legacy Healing Center',  attendance:'99.88%', attGrade:'3',quality:'89.41%',qaGrade:'4',transfer:'5.87%',trGrade:'3',admission:'7.41%', arGrade:'3',vob:'3.26%',vobGrade:'5',aht:'0:03:09',ahtGrade:'2',avgWeighted:'1.63',totalGrade:'2.63',equivalent:'Below Expectations',rank:'9'},
+    {year:'2026',month:'January', agent:'Dujale, John Vincent', campaign:'Legacy Healing Center',  attendance:'94.44%', attGrade:'2',quality:'91.00%',qaGrade:'5',transfer:'9.46%',trGrade:'4',admission:'14.29%',arGrade:'4',vob:'6.76%',vobGrade:'5',aht:'0:03:56',ahtGrade:'1',avgWeighted:'1.88',totalGrade:'2.88',equivalent:'Below Expectations',rank:'8'},
+    {year:'2026',month:'January', agent:'Padullano, Larinz',    campaign:'Legacy Healing Center',  attendance:'100.00%',attGrade:'5',quality:'83.67%',qaGrade:'2',transfer:'6.32%',trGrade:'3',admission:'5.41%', arGrade:'2',vob:'5.81%',vobGrade:'4',aht:'0:00:43',ahtGrade:'5',avgWeighted:'1.63',totalGrade:'3.13',equivalent:'Meets Expectations',rank:'1'},
+    {year:'2025',month:'December',agent:'Padullano, Larinz',    campaign:'Legacy Healing Center',  attendance:'100.00%',attGrade:'5',quality:'91.33%',qaGrade:'5',transfer:'5.52%',trGrade:'3',admission:'10.00%',arGrade:'3',vob:'4.53%',vobGrade:'1',aht:'0:01:57',ahtGrade:'5',avgWeighted:'1.50',totalGrade:'3.00',equivalent:'Meets Expectations',rank:'1'},
+    {year:'2025',month:'November',agent:'Angel, Byron Jake',    campaign:'Legacy Healing Center',  attendance:'100.00%',attGrade:'5',quality:'92.00%',qaGrade:'5',transfer:'2.79%',trGrade:'2',admission:'7.14%', arGrade:'3',vob:'2.99%',vobGrade:'3',aht:'0:02:03',ahtGrade:'4',avgWeighted:'1.50',totalGrade:'3.00',equivalent:'Meets Expectations',rank:'3'},
+    {year:'2026',month:'February',agent:'Torres, Jessica',      campaign:'Banyan Treatment Center', attendance:'98.50%', attGrade:'4',quality:'91.20%',qaGrade:'5',transfer:'5.10%',trGrade:'3',admission:'12.00%',arGrade:'4',vob:'3.80%',vobGrade:'4',aht:'0:02:10',ahtGrade:'4',avgWeighted:'1.75',totalGrade:'3.25',equivalent:'Meets Expectations',rank:'1'},
+    {year:'2026',month:'February',agent:'Holmes, Derek',        campaign:'Banyan Treatment Center', attendance:'88.00%', attGrade:'1',quality:'75.00%',qaGrade:'1',transfer:'3.00%',trGrade:'2',admission:'5.00%', arGrade:'2',vob:'2.50%',vobGrade:'2',aht:'0:04:20',ahtGrade:'1',avgWeighted:'0.88',totalGrade:'1.63',equivalent:'Needs Improvement',rank:'3'},
+    {year:'2026',month:'February',agent:'Sutton, Amy',          campaign:'Banyan Treatment Center', attendance:'100.00%',attGrade:'5',quality:'94.00%',qaGrade:'5',transfer:'7.20%',trGrade:'4',admission:'18.00%',arGrade:'5',vob:'5.10%',vobGrade:'4',aht:'0:01:50',ahtGrade:'5',avgWeighted:'2.00',totalGrade:'3.75',equivalent:'Exceeds Expectations',rank:'2'},
+    {year:'2026',month:'January', agent:'Torres, Jessica',      campaign:'Banyan Treatment Center', attendance:'97.00%', attGrade:'3',quality:'89.50%',qaGrade:'4',transfer:'4.80%',trGrade:'3',admission:'10.00%',arGrade:'3',vob:'3.50%',vobGrade:'4',aht:'0:02:25',ahtGrade:'3',avgWeighted:'1.63',totalGrade:'3.00',equivalent:'Meets Expectations',rank:'2'},
+    {year:'2025',month:'December',agent:'Sutton, Amy',          campaign:'Banyan Treatment Center', attendance:'100.00%',attGrade:'5',quality:'93.00%',qaGrade:'5',transfer:'6.80%',trGrade:'4',admission:'16.00%',arGrade:'5',vob:'4.80%',vobGrade:'4',aht:'0:01:55',ahtGrade:'5',avgWeighted:'1.88',totalGrade:'3.50',equivalent:'Exceeds Expectations',rank:'1'},
+    {year:'2026',month:'February',agent:'Nguyen, Kevin',        campaign:'Takahami Medical Billing', attendance:'100.00%',attGrade:'5',quality:'92.00%',qaGrade:'5',transfer:'6.50%',trGrade:'3',admission:'11.00%',arGrade:'4',vob:'4.20%',vobGrade:'4',aht:'0:02:15',ahtGrade:'4',avgWeighted:'1.75',totalGrade:'3.13',equivalent:'Meets Expectations',rank:'1'},
+    {year:'2026',month:'February',agent:'Kim, Laura',           campaign:'Takahami Medical Billing', attendance:'94.00%', attGrade:'3',quality:'87.50%',qaGrade:'3',transfer:'5.00%',trGrade:'3',admission:'8.00%', arGrade:'3',vob:'3.90%',vobGrade:'3',aht:'0:02:45',ahtGrade:'3',avgWeighted:'1.50',totalGrade:'2.63',equivalent:'Below Expectations',rank:'2'},
+    {year:'2026',month:'January', agent:'Nguyen, Kevin',        campaign:'Takahami Medical Billing', attendance:'99.00%', attGrade:'4',quality:'90.50%',qaGrade:'5',transfer:'6.00%',trGrade:'3',admission:'10.00%',arGrade:'3',vob:'4.00%',vobGrade:'4',aht:'0:02:20',ahtGrade:'4',avgWeighted:'1.63',totalGrade:'2.88',equivalent:'Below Expectations',rank:'1'},
+    {year:'2025',month:'December',agent:'Kim, Laura',           campaign:'Takahami Medical Billing', attendance:'96.00%', attGrade:'3',quality:'86.00%',qaGrade:'3',transfer:'4.50%',trGrade:'3',admission:'7.00%', arGrade:'3',vob:'3.60%',vobGrade:'3',aht:'0:02:50',ahtGrade:'3',avgWeighted:'1.50',totalGrade:'2.50',equivalent:'Below Expectations',rank:'2'},
   ];
-  populateFilters();
-  render();
+  populateFilters(); render();
 }
 
-// ── FILTERS ───────────────────────────────────────────────────────────
-const MONTH_ORDER = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-function populateFilters() {
-  const agents = [...new Set(allRows.map(r => r.agent))].sort();
-  const months = [...new Set(allRows.map(r => r.month))].sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
-  const years  = [...new Set(allRows.map(r => r.year))].sort();
-  fillSel('f-agent', agents);
-  fillSel('f-month', months);
-  fillSel('f-year',  years);
+// ── FILTERS ──────────────────────────────────────────────
+function populateFilters(){
+  const months=[...new Set(allRows.map(r=>r.month))].sort((a,b)=>MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b));
+  const years=[...new Set(allRows.map(r=>r.year))].sort();
+  fillSel('f-month',months); fillSel('f-year',years);
 }
-
-function fillSel(id, opts) {
-  const sel = document.getElementById(id), cur = sel.value;
-  while (sel.options.length > 1) sel.remove(1);
-  opts.forEach(o => { const opt = new Option(o, o); sel.add(opt); });
-  if (cur) sel.value = cur;
+function fillSel(id,opts){
+  const s=document.getElementById(id),cur=s.value;
+  while(s.options.length>1)s.remove(1);
+  opts.forEach(o=>s.add(new Option(o,o)));
+  if(cur)s.value=cur;
 }
-
-function getFiltered() {
-  const agent = document.getElementById('f-agent').value;
-  const month = document.getElementById('f-month').value;
-  const year  = document.getElementById('f-year').value;
-  const equiv = document.getElementById('f-equiv').value;
-  const q     = document.getElementById('f-search').value.toLowerCase();
-  const campaign = document.getElementById('f-campaign').value;
-  return allRows.filter(r =>
-    (!agent    || r.agent    === agent)    &&
-    (!month    || r.month    === month)    &&
-    (!year     || r.year     === year)     &&
-    (!campaign || r.campaign === campaign) &&
-    (!equiv    || r.equivalent === equiv)  &&
-    (!q        || r.agent.toLowerCase().includes(q))
+function getFiltered(){
+  const camp=document.getElementById('f-campaign').value;
+  const month=document.getElementById('f-month').value;
+  const year=document.getElementById('f-year').value;
+  const equiv=document.getElementById('f-equiv').value;
+  const q=document.getElementById('f-search').value.toLowerCase();
+  return allRows.filter(r=>
+    (!camp||r.campaign===camp)&&(!month||r.month===month)&&
+    (!year||r.year===year)&&(!equiv||r.equivalent===equiv)&&
+    (!q||r.agent.toLowerCase().includes(q))
   );
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────
-function render() {
-  const rows = getFiltered();
+// ── RENDER ────────────────────────────────────────────────
+function render(){
+  const rows=getFiltered();
+  renderAlerts(rows);
+  renderPodium(rows);
   renderCards(rows);
-  renderCharts(rows);
+  renderTrendChart(rows);
+  renderDonutChart(rows);
   renderTable(rows);
+  renderTrendsPage(rows);
 }
 
-// ── KPI CARDS ─────────────────────────────────────────────────────────
-function renderCards(rows) {
-  const el = document.getElementById('kpi-cards');
-  if (!rows.length) { el.innerHTML = ''; return; }
-
-  const pct = s => parseFloat(s) || 0;
-  const avgAtt  = rows.reduce((s,r) => s + pct(r.attendance), 0) / rows.length;
-  const avgQA   = rows.reduce((s,r) => s + pct(r.quality), 0) / rows.length;
-  const avgTG   = rows.reduce((s,r) => s + (parseFloat(r.totalGrade) || 0), 0) / rows.length;
-  const meets   = rows.filter(r => ['Meets Expectations','Exceeds Expectations'].includes(r.equivalent)).length;
-  const below   = rows.filter(r => ['Below Expectations','Needs Improvement'].includes(r.equivalent)).length;
-  const exceeds = rows.filter(r => r.equivalent === 'Exceeds Expectations').length;
-
-  const cards = [
-    { icon:'👥', bg:'#eff6ff', label:'Total records', val: rows.length, sub: 'filtered rows', chip: null },
-    { icon:'📋', bg:'#f0fdf4', label:'Avg attendance', val: avgAtt.toFixed(1)+'%',
-      chip: avgAtt >= TARGETS.attendance ? ['🟢 On target','s-green'] : avgAtt >= 90 ? ['🟡 Needs attention','s-yellow'] : ['🔴 Below target','s-red'] },
-    { icon:'⭐', bg:'#fffbeb', label:'Avg quality score', val: avgQA.toFixed(1)+'%',
-      chip: avgQA >= TARGETS.quality ? ['🟢 On target','s-green'] : avgQA >= 85 ? ['🟡 Needs attention','s-yellow'] : ['🔴 Below target','s-red'] },
-    { icon:'📊', bg:'#faf5ff', label:'Avg total grade', val: avgTG.toFixed(2),
-      chip: avgTG >= 3 ? ['🟢 On target','s-green'] : avgTG >= 2.5 ? ['🟡 Needs attention','s-yellow'] : ['🔴 Below target','s-red'] },
-    { icon:'✅', bg:'#f0fdf4', label:'On target', val: meets, sub: 'Meets / Exceeds', chip: null },
-    { icon:'⚠️', bg:'#fef2f2', label:'Needs work', val: below, sub: 'Below / Needs impr.', chip: null },
-  ];
-
-  el.innerHTML = cards.map(c => `
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:${c.bg}">${c.icon}</div>
-      <div class="kpi-label">${c.label}</div>
-      <div class="kpi-val">${c.val}</div>
-      ${c.chip ? `<span class="status-chip ${c.chip[1]}">${c.chip[0]}</span>` : c.sub ? `<div style="font-size:11px;color:var(--text3)">${c.sub}</div>` : ''}
-    </div>`).join('');
-}
-
-// ── CHARTS ────────────────────────────────────────────────────────────
-function renderCharts(rows) {
-  // Trend — avg total grade per month/year
-  const periodMap = {};
-  rows.forEach(r => {
-    const key = `${r.month} ${r.year}`;
-    if (!periodMap[key]) periodMap[key] = [];
-    periodMap[key].push(parseFloat(r.totalGrade) || 0);
-  });
-  const periods = Object.keys(periodMap).sort((a, b) => {
-    const [ma, ya] = a.split(' '); const [mb, yb] = b.split(' ');
-    return ya !== yb ? +ya - +yb : MONTH_ORDER.indexOf(ma) - MONTH_ORDER.indexOf(mb);
-  });
-  const trendData = periods.map(p => +(periodMap[p].reduce((s,v)=>s+v,0)/periodMap[p].length).toFixed(2));
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const tickColor = isDark ? '#94a3b8' : '#6b7280';
-
-  const tCtx = document.getElementById('chart-trend').getContext('2d');
-  if (chartTrend) chartTrend.destroy();
-  chartTrend = new Chart(tCtx, {
-    type: 'line',
-    data: {
-      labels: periods,
-      datasets: [{
-        label: 'Avg Total Grade',
-        data: trendData,
-        borderColor: '#2563eb',
-        backgroundColor: '#2563eb18',
-        tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#2563eb',
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 5, grid: { color: gridColor }, ticks: { color: tickColor } },
-        x: { grid: { color: gridColor }, ticks: { color: tickColor, maxRotation: 35 } }
-      }
+// ── ALERTS ───────────────────────────────────────────────
+function renderAlerts(rows){
+  const bar=document.getElementById('alerts-bar');
+  const alerts=[];
+  // find agents who dropped
+  const agents=[...new Set(rows.map(r=>r.agent))];
+  agents.forEach(name=>{
+    const agentRows=rows.filter(r=>r.agent===name)
+      .sort((a,b)=>{const yi=+a.year-+b.year; return yi!==0?yi:MONTH_ORDER.indexOf(a.month)-MONTH_ORDER.indexOf(b.month);});
+    if(agentRows.length>=2){
+      const prev=parseFloat(agentRows[agentRows.length-2].totalGrade)||0;
+      const curr=parseFloat(agentRows[agentRows.length-1].totalGrade)||0;
+      const diff=curr-prev;
+      if(diff<=-0.5) alerts.push({type:'warn',msg:`${name} dropped ${Math.abs(diff).toFixed(2)} pts (${agentRows[agentRows.length-2].month} → ${agentRows[agentRows.length-1].month})`});
     }
   });
-
-  // Donut — equivalent distribution
-  const counts = { 'Exceeds Expectations': 0, 'Meets Expectations': 0, 'Below Expectations': 0, 'Needs Improvement': 0 };
-  rows.forEach(r => { if (counts[r.equivalent] !== undefined) counts[r.equivalent]++; });
-  const dCtx = document.getElementById('chart-donut').getContext('2d');
-  if (chartDonut) chartDonut.destroy();
-  chartDonut = new Chart(dCtx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(counts),
-      datasets: [{ data: Object.values(counts), backgroundColor: ['#2563eb','#16a34a','#d97706','#dc2626'], borderWidth: 2, borderColor: isDark ? '#1a1d27' : '#fff' }]
-    },
-    options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }, color: tickColor, boxWidth: 12 } } } }
-  });
+  const below=rows.filter(r=>r.equivalent==='Needs Improvement');
+  if(below.length) alerts.push({type:'warn',msg:`${below.length} agent${below.length>1?'s':''} rated Needs Improvement: ${[...new Set(below.map(r=>r.agent))].join(', ')}`});
+  const top=rows.filter(r=>r.equivalent==='Exceeds Expectations');
+  if(top.length) alerts.push({type:'good',msg:`🌟 ${[...new Set(top.map(r=>r.agent))].join(', ')} — Exceeds Expectations this period`});
+  bar.innerHTML=alerts.map(a=>`<div class="alert-item alert-${a.type}"><i class="ti ti-${a.type==='warn'?'alert-triangle':'circle-check'}"></i><span>${a.msg}</span></div>`).join('');
 }
 
-// ── TABLE ─────────────────────────────────────────────────────────────
-function renderTable(rows) {
-  const sorted = [...rows].sort((a, b) => {
-    let av = a[sortKey], bv = b[sortKey];
-    if (sortKey === 'rank') { av = parseInt(av)||999; bv = parseInt(bv)||999; }
-    if (av < bv) return sortAsc ? -1 : 1;
-    if (av > bv) return sortAsc ? 1 : -1;
-    return 0;
+// ── PODIUM ────────────────────────────────────────────────
+function renderPodium(rows){
+  // get latest month's data for each agent
+  const agentLatest={};
+  rows.forEach(r=>{
+    const key=r.agent;
+    if(!agentLatest[key]){agentLatest[key]=r;return;}
+    const cur=agentLatest[key];
+    if(+r.year>+cur.year||(r.year===cur.year&&MONTH_ORDER.indexOf(r.month)>MONTH_ORDER.indexOf(cur.month)))
+      agentLatest[key]=r;
   });
+  const sorted=Object.values(agentLatest)
+    .filter(r=>parseInt(r.rank)>0)
+    .sort((a,b)=>parseInt(a.rank)-parseInt(b.rank))
+    .slice(0,3);
+  const podium=document.getElementById('podium');
+  if(!sorted.length){podium.innerHTML='<p class="msg-empty">No ranked agents in selected filters.</p>';return;}
+  const medals=['🥇','🥈','🥉'];
+  const cls=['gold','silver','bronze'];
+  podium.innerHTML=sorted.map((r,i)=>{
+    const prev=getPrevRow(r,rows);
+    const delta=prev?parseFloat(r.totalGrade)-parseFloat(prev.totalGrade):null;
+    const deltaHTML=delta===null?'':delta>0.05?`<span class="podium-delta delta-up">▲ +${delta.toFixed(2)}</span>`:delta<-0.05?`<span class="podium-delta delta-dn">▼ ${delta.toFixed(2)}</span>`:`<span class="podium-delta delta-flat">→ No change</span>`;
+    const av=avatarColor(r.agent);
+    const initials=r.agent.split(',').map(p=>p.trim()[0]).join('').toUpperCase().slice(0,2);
+    return`<div class="podium-card ${cls[i]}">
+      <span class="podium-rank">#${r.rank} overall</span>
+      <span class="podium-medal">${medals[i]}</span>
+      <div class="podium-avatar" style="background:${av}">${initials}</div>
+      <div class="podium-name">${r.agent}</div>
+      <div class="podium-campaign">${r.campaign}</div>
+      <div class="podium-score">${r.totalGrade}</div>
+      <div class="podium-score-label">Total grade · ${r.month} ${r.year}</div>
+      ${deltaHTML}
+    </div>`;
+  }).join('');
+}
 
-  const tbody = document.getElementById('tbody');
-  if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="18" class="msg">No records match the current filters.</td></tr>'; return; }
+function getPrevRow(r,rows){
+  const agentRows=rows.filter(a=>a.agent===r.agent)
+    .sort((a,b)=>{const yi=+a.year-+b.year;return yi!==0?yi:MONTH_ORDER.indexOf(a.month)-MONTH_ORDER.indexOf(b.month);});
+  const idx=agentRows.findIndex(a=>a.month===r.month&&a.year===r.year);
+  return idx>0?agentRows[idx-1]:null;
+}
 
-  tbody.innerHTML = sorted.map((r, i) => {
-    const rankN = parseInt(r.rank);
-    const rankCell = isNaN(rankN)
-      ? `<span style="color:var(--text3)">—</span>`
-      : rankN === 1 ? `<span class="medal">🥇</span>`
-      : rankN === 2 ? `<span class="medal">🥈</span>`
-      : rankN === 3 ? `<span class="medal">🥉</span>`
-      : `<span class="rank-num">#${rankN}</span>`;
-    const isTop = rankN <= 3 && !isNaN(rankN);
+// ── KPI CARDS ─────────────────────────────────────────────
+function renderCards(rows){
+  const el=document.getElementById('kpi-cards');
+  if(!rows.length){el.innerHTML='';return;}
+  const pct=s=>parseFloat(s)||0;
+  const avgAtt=rows.reduce((s,r)=>s+pct(r.attendance),0)/rows.length;
+  const avgQA=rows.reduce((s,r)=>s+pct(r.quality),0)/rows.length;
+  const avgTG=rows.reduce((s,r)=>s+(parseFloat(r.totalGrade)||0),0)/rows.length;
+  const meets=rows.filter(r=>['Meets Expectations','Exceeds Expectations'].includes(r.equivalent)).length;
+  const below=rows.filter(r=>['Below Expectations','Needs Improvement'].includes(r.equivalent)).length;
+  const agents=new Set(rows.map(r=>r.agent)).size;
+  const chip=(v,t)=>v>=t?'c-g':v>=t*.92?'c-y':'c-r';
+  const label=(v,t)=>v>=t?'🟢 On target':v>=t*.92?'🟡 Near target':'🔴 Below target';
+  const cards=[
+    {ic:'ti-users',bg:'#eff6ff',label:'Agents tracked',val:agents,sub:'in selection'},
+    {ic:'ti-calendar-check',bg:'#f0fdf4',label:'Avg attendance',val:avgAtt.toFixed(1)+'%',chip:chip(avgAtt,TARGETS.attendance),chipLabel:label(avgAtt,TARGETS.attendance)},
+    {ic:'ti-star',bg:'#fffbeb',label:'Avg quality score',val:avgQA.toFixed(1)+'%',chip:chip(avgQA,TARGETS.quality),chipLabel:label(avgQA,TARGETS.quality)},
+    {ic:'ti-chart-bar',bg:'#faf5ff',label:'Avg total grade',val:avgTG.toFixed(2),chip:chip(avgTG,TARGETS.totalGrade),chipLabel:label(avgTG,TARGETS.totalGrade)},
+    {ic:'ti-circle-check',bg:'#f0fdf4',label:'On target',val:meets,sub:'Meets / Exceeds'},
+    {ic:'ti-alert-triangle',bg:'#fef2f2',label:'Needs work',val:below,sub:'Below / Needs impr.'},
+  ];
+  el.innerHTML=cards.map(c=>`<div class="kpi-card">
+    <div class="kpi-ic" style="background:${c.bg}"><i class="ti ${c.ic}" style="font-size:16px;color:${c.bg==='#eff6ff'?'#2563eb':c.bg==='#faf5ff'?'#7c3aed':c.bg==='#fef2f2'?'#dc2626':'#16a34a'}"></i></div>
+    <div class="kpi-label">${c.label}</div>
+    <div class="kpi-val">${c.val}</div>
+    ${c.chip?`<span class="kpi-chip ${c.chip}">${c.chipLabel}</span>`:c.sub?`<div style="font-size:11px;color:var(--text3)">${c.sub}</div>`:''}
+  </div>`).join('');
+}
 
-    return `<tr class="${isTop ? 'top-row' : ''}">
+// ── CHARTS ────────────────────────────────────────────────
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function gc(){return isDark()?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)';}
+function tc(){return isDark()?'#94a3b8':'#6b7280';}
+
+function renderTrendChart(rows){
+  const ctx=document.getElementById('chart-trend').getContext('2d');
+  if(charts.trend)charts.trend.destroy();
+  const pm={};
+  rows.forEach(r=>{const k=`${r.month.slice(0,3)} ${r.year}`;if(!pm[k])pm[k]=[];pm[k].push(parseFloat(r.totalGrade)||0);});
+  const periods=Object.keys(pm).sort((a,b)=>{
+    const[ma,ya]=a.split(' ');const[mb,yb]=b.split(' ');
+    return+ya!==+yb?+ya-+yb:MONTH_ORDER.indexOf(ma.padEnd(9))-MONTH_ORDER.indexOf(mb.padEnd(9));
+  });
+  // Fix month abbreviation matching
+  const fullPeriods=Object.keys(pm).sort((a,b)=>{
+    const pa=a.split(' '),pb=b.split(' ');
+    const ya=+pa[1],yb=+pb[1];
+    if(ya!==yb)return ya-yb;
+    const ma=MONTH_ORDER.findIndex(m=>m.startsWith(pa[0]));
+    const mb2=MONTH_ORDER.findIndex(m=>m.startsWith(pb[0]));
+    return ma-mb2;
+  });
+  const data=fullPeriods.map(p=>{const v=pm[p];return+(v.reduce((s,x)=>s+x,0)/v.length).toFixed(2);});
+  charts.trend=new Chart(ctx,{type:'line',data:{labels:fullPeriods,datasets:[
+    {label:'Avg total grade',data,borderColor:'#2563eb',backgroundColor:'#2563eb15',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#2563eb'},
+    {label:'Target',data:fullPeriods.map(()=>TARGETS.totalGrade),borderColor:'#dc2626',borderDash:[5,4],pointRadius:0,borderWidth:1.5,fill:false},
+  ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:12},color:tc()}}},scales:{y:{min:0,max:5,grid:{color:gc()},ticks:{color:tc()}},x:{grid:{color:gc()},ticks:{color:tc(),maxRotation:35}}}}});
+}
+
+function renderDonutChart(rows){
+  const ctx=document.getElementById('chart-donut').getContext('2d');
+  if(charts.donut)charts.donut.destroy();
+  const counts={'Exceeds Expectations':0,'Meets Expectations':0,'Below Expectations':0,'Needs Improvement':0};
+  rows.forEach(r=>{if(counts[r.equivalent]!==undefined)counts[r.equivalent]++;});
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{
+    labels:Object.keys(counts),
+    datasets:[{data:Object.values(counts),backgroundColor:['#2563eb','#16a34a','#d97706','#dc2626'],borderWidth:2,borderColor:isDark()?'#161926':'#fff'}]
+  },options:{responsive:true,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:12},color:tc(),boxWidth:12}}}}});
+}
+
+function renderTrendsPage(rows){
+  // Multi-line chart per agent
+  const ctx=document.getElementById('chart-lines').getContext('2d');
+  if(charts.lines)charts.lines.destroy();
+  const agents=[...new Set(rows.map(r=>r.agent))].slice(0,8);
+  const allPeriods=[...new Set(rows.map(r=>`${r.month.slice(0,3)} ${r.year}`))].sort((a,b)=>{
+    const pa=a.split(' '),pb=b.split(' ');
+    if(+pa[1]!==+pb[1])return+pa[1]-+pb[1];
+    return MONTH_ORDER.findIndex(m=>m.startsWith(pa[0]))-MONTH_ORDER.findIndex(m=>m.startsWith(pb[0]));
+  });
+  const palette=['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#db2777','#65a30d'];
+  const datasets=agents.map((agent,i)=>{
+    const data=allPeriods.map(p=>{
+      const [mo,yr]=p.split(' ');
+      const match=rows.find(r=>r.agent===agent&&r.month.startsWith(mo)&&r.year===yr);
+      return match?parseFloat(match.totalGrade)||null:null;
+    });
+    return{label:agent,data,borderColor:palette[i%palette.length],backgroundColor:'transparent',tension:.4,pointRadius:3,spanGaps:true};
+  });
+  charts.lines=new Chart(ctx,{type:'line',data:{labels:allPeriods,datasets},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},color:tc(),boxWidth:10}}},scales:{y:{min:0,max:5,grid:{color:gc()},ticks:{color:tc()}},x:{grid:{color:gc()},ticks:{color:tc(),maxRotation:35}}}}});
+
+  // Campaign bar chart
+  const ctx2=document.getElementById('chart-camp').getContext('2d');
+  if(charts.camp)charts.camp.destroy();
+  const camps=['Legacy Healing Center','Banyan Treatment Center','Takahami Medical Billing'];
+  const metrics=['attendance','quality'];
+  const campData=camps.map(c=>{
+    const cr=rows.filter(r=>r.campaign===c);
+    return{att:cr.length?(cr.reduce((s,r)=>s+(parseFloat(r.attendance)||0),0)/cr.length).toFixed(1):0,
+           qa:cr.length?(cr.reduce((s,r)=>s+(parseFloat(r.quality)||0),0)/cr.length).toFixed(1):0,
+           tg:cr.length?(cr.reduce((s,r)=>s+(parseFloat(r.totalGrade)||0),0)/cr.length).toFixed(2):0};
+  });
+  charts.camp=new Chart(ctx2,{type:'bar',data:{
+    labels:camps.map(c=>c.split(' ').slice(0,2).join(' ')),
+    datasets:[
+      {label:'Avg attendance',data:campData.map(d=>d.att),backgroundColor:'#2563eb99',borderColor:'#2563eb',borderWidth:1},
+      {label:'Avg quality',data:campData.map(d=>d.qa),backgroundColor:'#16a34a99',borderColor:'#16a34a',borderWidth:1},
+    ]
+  },options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:12},color:tc()}}},scales:{y:{min:50,max:100,grid:{color:gc()},ticks:{color:tc(),callback:v=>v+'%'}},x:{grid:{color:gc()},ticks:{color:tc()}}}}});
+
+  // Radar — team averages
+  const ctx3=document.getElementById('chart-radar').getContext('2d');
+  if(charts.radar)charts.radar.destroy();
+  const filtered=rows;
+  const n=filtered.length||1;
+  const avgData=[
+    +(filtered.reduce((s,r)=>s+(parseFloat(r.attendance)||0),0)/n).toFixed(1),
+    +(filtered.reduce((s,r)=>s+(parseFloat(r.quality)||0),0)/n).toFixed(1),
+    +(filtered.reduce((s,r)=>s+(parseFloat(r.attGrade)||0),0)/n*20).toFixed(1),
+    +(filtered.reduce((s,r)=>s+(parseFloat(r.qaGrade)||0),0)/n*20).toFixed(1),
+    +(filtered.reduce((s,r)=>s+(parseFloat(r.totalGrade)||0)/5*100,0)/n).toFixed(1),
+  ];
+  charts.radar=new Chart(ctx3,{type:'radar',data:{
+    labels:['Attendance','Quality','Att. Grade','QA Grade','Total (scaled)'],
+    datasets:[
+      {label:'Team avg',data:avgData,backgroundColor:'#2563eb25',borderColor:'#2563eb',pointBackgroundColor:'#2563eb'},
+      {label:'Target',data:[98,90,80,80,60],backgroundColor:'#16a34a10',borderColor:'#16a34a',borderDash:[4,3],pointRadius:0},
+    ]
+  },options:{responsive:true,scales:{r:{min:50,max:100,grid:{color:gc()},ticks:{color:tc(),backdropColor:'transparent'}}},plugins:{legend:{position:'bottom',labels:{font:{size:12},color:tc()}}}}});
+}
+
+// ── TABLE ─────────────────────────────────────────────────
+function renderTable(rows){
+  const sorted=[...rows].sort((a,b)=>{
+    let av=a[sortKey],bv=b[sortKey];
+    if(sortKey==='rank'){av=parseInt(av)||999;bv=parseInt(bv)||999;}
+    if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0;
+  });
+  const tbody=document.getElementById('tbody');
+  if(!sorted.length){tbody.innerHTML='<tr><td colspan="19" class="msg-empty">No records match the current filters.</td></tr>';return;}
+  tbody.innerHTML=sorted.map(r=>{
+    const rankN=parseInt(r.rank);
+    const isTop=rankN<=3&&!isNaN(rankN);
+    const rankCell=isNaN(rankN)?`<span style="color:var(--text3)">—</span>`:rankN===1?'🥇':rankN===2?'🥈':rankN===3?'🥉':`<span class="rank-num">#${rankN}</span>`;
+    const prev=getPrevRow(r,allRows);
+    const delta=prev?parseFloat(r.totalGrade)-parseFloat(prev.totalGrade):null;
+    const deltaTag=delta===null?'':delta>0.05?`<span class="td-delta delta-up">▲${delta.toFixed(1)}</span>`:delta<-0.05?`<span class="td-delta delta-dn">▼${Math.abs(delta).toFixed(1)}</span>`:'';
+    return`<tr class="${isTop?'top-row':''}" onclick="openSlideOver('${r.agent.replace(/'/g,"\\'")}','${r.month}','${r.year}')">
       <td>${rankCell}</td>
       <td><strong>${r.agent}</strong></td>
-      <td><span style="font-size:11px;padding:2px 7px;border-radius:20px;background:var(--accent-l);color:var(--accent);font-weight:600">${r.campaign}</span></td>
-      <td style="color:var(--text2)">${r.month} ${r.year}</td>
+      <td><span class="camp-tag">${r.campaign.split(' ')[0]}</span></td>
+      <td style="color:var(--text2)">${r.month.slice(0,3)} ${r.year}</td>
       <td>${bar(r.attendance)}</td><td>${g(r.attGrade)}</td>
       <td>${bar(r.quality)}</td><td>${g(r.qaGrade)}</td>
       <td>${r.transfer}</td><td>${g(r.trGrade)}</td>
@@ -507,82 +749,168 @@ function renderTable(rows) {
       <td>${r.vob}</td><td>${g(r.vobGrade)}</td>
       <td>${r.aht}</td><td>${g(r.ahtGrade)}</td>
       <td style="font-weight:600">${r.avgWeighted}</td>
-      <td style="font-weight:700">${r.totalGrade}</td>
+      <td style="font-weight:700">${r.totalGrade} ${deltaTag}</td>
       <td>${eq(r.equivalent)}</td>
     </tr>`;
   }).join('');
 }
 
-function bar(val) {
-  const n = parseFloat(val) || 0;
-  const color = n >= 98 ? '#16a34a' : n >= 90 ? '#2563eb' : n >= 80 ? '#d97706' : '#dc2626';
-  return `<div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(n,100)}%;background:${color}"></div></div><span class="bar-val">${val}</span></div>`;
+function bar(val){
+  const n=parseFloat(val)||0;
+  const color=n>=98?'#16a34a':n>=90?'#2563eb':n>=80?'#d97706':'#dc2626';
+  return`<div class="bar-wrap"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(n,100)}%;background:${color}"></div></div><span class="bar-val">${val}</span></div>`;
+}
+function g(v){const n=parseInt(v);return isNaN(n)?`<span style="color:var(--text3)">—</span>`:`<span class="g g${n}">${n}</span>`;}
+function eq(v){if(!v)return`<span class="eq eq-na">—</span>`;const cls=v.includes('Exceeds')?'eq-exc':v.includes('Meets')?'eq-meet':v.includes('Below')?'eq-bel':v.includes('Needs')?'eq-exp':'eq-na';return`<span class="eq ${cls}">${v}</span>`;}
+function sortBy(k){sortAsc=sortKey===k?!sortAsc:true;sortKey=k;render();}
+function filterTable(){const q=document.getElementById('rank-search').value.toLowerCase();document.querySelectorAll('#tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none');}
+
+// ── SLIDE-OVER ────────────────────────────────────────────
+function openSlideOver(agentName, month, year){
+  const agentRows=allRows.filter(r=>r.agent===agentName)
+    .sort((a,b)=>{const yi=+a.year-+b.year;return yi!==0?yi:MONTH_ORDER.indexOf(a.month)-MONTH_ORDER.indexOf(b.month);});
+  const current=agentRows.find(r=>r.month===month&&r.year===year)||agentRows[agentRows.length-1];
+  const prev=getPrevRow(current,allRows);
+  const allAgents=[...new Set(allRows.map(r=>r.agent))];
+  const ranked=allRows.filter(r=>r.month===month&&r.year===year&&parseInt(r.rank)>0).sort((a,b)=>parseInt(a.rank)-parseInt(b.rank));
+  const rankPos=ranked.findIndex(r=>r.agent===agentName);
+  const av=avatarColor(agentName);
+  const initials=agentName.split(',').map(p=>p.trim()[0]).join('').toUpperCase().slice(0,2);
+
+  const delta=(field)=>{
+    if(!prev)return'';
+    const d=(parseFloat(current[field])||0)-(parseFloat(prev[field])||0);
+    if(Math.abs(d)<0.05)return'';
+    const cls=d>0?'delta-up':'delta-dn';
+    return`<span class="so-kpi-delta kpi-chip ${cls}">${d>0?'▲':'▼'} ${Math.abs(d).toFixed(2)} vs ${prev.month}</span>`;
+  };
+
+  const body=document.getElementById('so-body');
+  body.innerHTML=`
+    <div class="so-hero">
+      <div class="so-avatar" style="background:${av}">${initials}</div>
+      <div>
+        <div class="so-agent-name">${agentName}</div>
+        <div class="so-agent-camp">${current.campaign}</div>
+        <div style="margin-top:.4rem">${eq(current.equivalent)}</div>
+      </div>
+      ${rankPos>=0?`<div class="so-rank-badge"><div class="so-rank-num">#${rankPos+1}</div><div class="so-rank-label">Team rank</div></div>`:''}
+    </div>
+
+    <div class="so-section">
+      <div class="so-section-title">KPI scorecard — ${current.month} ${current.year}</div>
+      <div class="so-kpis">
+        <div class="so-kpi"><div class="so-kpi-label">Attendance</div><div class="so-kpi-val">${current.attendance}</div>${delta('attendance')}</div>
+        <div class="so-kpi"><div class="so-kpi-label">Quality score</div><div class="so-kpi-val">${current.quality}</div>${delta('quality')}</div>
+        <div class="so-kpi"><div class="so-kpi-label">Transfer rate</div><div class="so-kpi-val">${current.transfer}</div></div>
+        <div class="so-kpi"><div class="so-kpi-label">Admission rate</div><div class="so-kpi-val">${current.admission}</div></div>
+        <div class="so-kpi"><div class="so-kpi-label">VOB rate</div><div class="so-kpi-val">${current.vob}</div></div>
+        <div class="so-kpi"><div class="so-kpi-label">AHT</div><div class="so-kpi-val">${current.aht}</div></div>
+        <div class="so-kpi"><div class="so-kpi-label">Avg weighted</div><div class="so-kpi-val">${current.avgWeighted}</div></div>
+        <div class="so-kpi" style="border-color:var(--accent)"><div class="so-kpi-label">Total grade</div><div class="so-kpi-val" style="color:var(--accent)">${current.totalGrade}</div>${delta('totalGrade')}</div>
+      </div>
+    </div>
+
+    <div class="so-section">
+      <div class="so-section-title">Performance vs targets</div>
+      ${progressRow('Attendance',parseFloat(current.attendance)||0,TARGETS.attendance,'%')}
+      ${progressRow('Quality score',parseFloat(current.quality)||0,TARGETS.quality,'%')}
+      ${progressRow('Total grade',(parseFloat(current.totalGrade)||0)/5*100,TARGETS.totalGrade/5*100,'')}
+    </div>
+
+    <div class="so-section">
+      <div class="so-section-title">Performance history</div>
+      ${agentRows.map(r=>{
+        const p=getPrevRow(r,allRows);
+        const d=p?parseFloat(r.totalGrade)-parseFloat(p.totalGrade):null;
+        const dTag=d===null?'':d>0.05?`<span class="td-delta delta-up">▲${d.toFixed(2)}</span>`:d<-0.05?`<span class="td-delta delta-dn">▼${Math.abs(d).toFixed(2)}</span>`:`<span class="td-delta delta-flat">→</span>`;
+        return`<div class="history-row">
+          <span class="history-period">${r.month} ${r.year}</span>
+          <span>${eq(r.equivalent)}</span>
+          <span style="font-weight:700">${r.totalGrade} ${dTag}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="so-section">
+      <div class="so-section-title">Grade breakdown</div>
+      ${['Attendance','Quality','Transfer Rate','Admission','VOB','AHT'].map((label,i)=>{
+        const grades=[current.attGrade,current.qaGrade,current.trGrade,current.arGrade,current.vobGrade,current.ahtGrade];
+        return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;border-bottom:0.5px solid var(--border);font-size:13px"><span style="color:var(--text2)">${label}</span>${g(grades[i])}</div>`;
+      }).join('')}
+    </div>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
 }
 
-function g(v) {
-  const n = parseInt(v);
-  return isNaN(n) ? `<span style="color:var(--text3)">—</span>` : `<span class="g g${n}">${n}</span>`;
+function progressRow(label,val,target,unit){
+  const color=val>=target?'#16a34a':val>=target*.92?'#d97706':'#dc2626';
+  const pct=Math.min(val/100*100,100);
+  const targetPct=Math.min(target,100);
+  return`<div class="progress-row">
+    <span class="progress-label">${label}</span>
+    <div class="progress-track">
+      <div class="progress-fill" style="width:${pct}%;background:${color}"></div>
+      <div class="progress-target" style="left:${targetPct}%"></div>
+    </div>
+    <span class="progress-val">${val.toFixed(1)}${unit}</span>
+  </div>`;
 }
 
-function eq(v) {
-  if (!v) return `<span class="eq eq-na">—</span>`;
-  const cls = v.includes('Exceeds') ? 'eq-exc' : v.includes('Meets') ? 'eq-meet' : v.includes('Below') ? 'eq-bel' : v.includes('Needs') ? 'eq-exp' : 'eq-na';
-  return `<span class="eq ${cls}">${v}</span>`;
+function closeSlideOver(e){
+  if(e&&e.target!==document.getElementById('overlay'))return;
+  document.getElementById('overlay').classList.remove('open');
 }
 
-function sortBy(key) {
-  sortAsc = sortKey === key ? !sortAsc : true;
-  sortKey = key;
-  render();
-}
-
-function filterTable() {
-  const q = document.getElementById('rank-search').value.toLowerCase();
-  document.querySelectorAll('#tbody tr').forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
-}
-
-// ── EXPORT ────────────────────────────────────────────────────────────
-function exportCSV() {
-  const rows = getFiltered();
-  const head = ['Year','Month','Agent','Campaign','Attendance','Att Grade','Quality','QA Grade','Transfer Rate','TR Grade','Admission Rate','AR Grade','VOB Rate','VOB Grade','AHT','AHT Grade','Avg Weighted','Total Grade','Equivalent','Rank'];
-  const body = rows.map(r => [r.year,r.month,r.agent,r.campaign,r.attendance,r.attGrade,r.quality,r.qaGrade,r.transfer,r.trGrade,r.admission,r.arGrade,r.vob,r.vobGrade,r.aht,r.ahtGrade,r.avgWeighted,r.totalGrade,r.equivalent,r.rank].map(v=>`"${v}"`).join(','));
-  const csv = [head.join(','), ...body].join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = `legacy-kpi-${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
+// ── EXPORT ────────────────────────────────────────────────
+function exportCSV(){
+  const rows=getFiltered();
+  const head=['Year','Month','Agent','Campaign','Attendance','Att Grade','Quality','QA Grade','Transfer','TR Grade','Admission','AR Grade','VOB','VOB Grade','AHT','AHT Grade','Avg Weighted','Total Grade','Equivalent','Rank'];
+  const body=rows.map(r=>[r.year,r.month,r.agent,r.campaign,r.attendance,r.attGrade,r.quality,r.qaGrade,r.transfer,r.trGrade,r.admission,r.arGrade,r.vob,r.vobGrade,r.aht,r.ahtGrade,r.avgWeighted,r.totalGrade,r.equivalent,r.rank].map(v=>`"${v}"`).join(','));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[head.join(','),...body].join('\n')],{type:'text/csv'}));
+  a.download=`kpi-${new Date().toISOString().split('T')[0]}.csv`;a.click();
   toast('CSV exported');
 }
 
-// ── THEME ─────────────────────────────────────────────────────────────
-function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  render(); // redraw charts with new colors
+// ── NAV ───────────────────────────────────────────────────
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  const titles={overview:'Dashboard',ranking:'Team ranking',trends:'Trends'};
+  document.getElementById('page-title').textContent=titles[id]||'Dashboard';
+  if(id==='trends')renderTrendsPage(getFiltered());
+}
+
+// ── THEME ─────────────────────────────────────────────────
+function toggleTheme(){
+  const d=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',d?'light':'dark');
+  document.getElementById('theme-ic').className=d?'ti ti-moon':'ti ti-sun';
+  localStorage.setItem('theme',d?'light':'dark');
+  render();
 }
 (function(){
-  const t = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
+  const t=localStorage.getItem('theme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  const ic=document.getElementById('theme-ic');
+  if(ic)ic.className=t==='dark'?'ti ti-sun':'ti ti-moon';
 })();
 
-// ── TOAST ─────────────────────────────────────────────────────────────
-let _toastTimer;
-function toast(msg, dur=2500) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.style.display = 'flex';
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.style.display = 'none', dur);
-}
+// ── SIDEBAR TOGGLE ────────────────────────────────────────
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
-// ── AUTO-REFRESH every 5 min ──────────────────────────────────────────
-setInterval(loadData, 5 * 60 * 1000);
+// ── HELPERS ───────────────────────────────────────────────
+function avatarColor(name){const i=Math.abs(name.split('').reduce((s,c)=>s+c.charCodeAt(0),0))%AVATAR_COLORS.length;return AVATAR_COLORS[i];}
 
-// ── INIT ──────────────────────────────────────────────────────────────
+let _toastT;
+function toast(msg,dur=2800){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(_toastT);_toastT=setTimeout(()=>el.style.display='none',dur);}
+
+// ── AUTO-REFRESH ──────────────────────────────────────────
+setInterval(loadData,5*60*1000);
 loadData();
 </script>
 </body>
